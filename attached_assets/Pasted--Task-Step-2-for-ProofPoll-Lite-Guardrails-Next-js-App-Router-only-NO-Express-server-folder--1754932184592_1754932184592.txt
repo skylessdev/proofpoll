@@ -1,0 +1,72 @@
+
+
+Task: Step 2 for ProofPoll Lite.
+
+Guardrails:
+- Next.js App Router only; NO Express/server folder.
+- Do not alter Tailwind or the home page.
+- Keep deps minimal; ask before adding anything not listed.
+
+What to do:
+1) Prisma models in prisma/schema.prisma:
+   model Poll {
+     id        String   @id @default(cuid())
+     question  String
+     options   Option[]
+     createdAt DateTime @default(now())
+   }
+
+   model Option {
+     id        String  @id @default(cuid())
+     label     String
+     poll      Poll    @relation(fields: [pollId], references: [id])
+     pollId    String
+     votes     Vote[]
+   }
+
+   model Vote {
+     id            String   @id @default(cuid())
+     pollId        String
+     optionId      String
+     voterProofId  String
+     proofHash     String
+     createdAt     DateTime @default(now())
+     @@unique([pollId, voterProofId])
+   }
+
+   IMPORTANT: Configure Prisma datasource for Postgres using env:
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   For local dev, if DATABASE_URL is missing, use SQLite only temporarily by adding a `.env.example` with a comment; do NOT lock the schema to SQLite.
+
+2) Create `/lib/db.ts` — Prisma client singleton (hot-reload safe).
+
+3) Create `/lib/proof.ts` with:
+   - getVoterProofId(source: 'slack'|'discord', userId: string): string
+   - signVote(input: { pollId: string; optionId: string; voterProofId: string }): { proofHash: string }
+   Use HMAC-SHA256 with `PROOF_SECRET`. Output must be deterministic for same inputs.
+
+4) Add tests with **vitest**:
+   - Install: `vitest @types/node` (if not present).
+   - `package.json` script: `"test": "vitest run"`
+   - `/tests/proof.test.ts`:
+       - same inputs → same `getVoterProofId`
+       - different source → different `getVoterProofId`
+       - same inputs → same `signVote.proofHash`
+       - changing `optionId` → different `proofHash`
+
+5) Migrations:
+   - I will provide `DATABASE_URL` in Secrets. Run:
+     `pnpm prisma generate`
+     `pnpm prisma migrate dev -n init`
+   - If DATABASE_URL is not set, explain clearly how to set it for Postgres; do NOT silently switch to SQLite.
+
+Acceptance Criteria:
+- `/lib/db.ts` and `/lib/proof.ts` exist and compile.
+- `pnpm prisma generate` works and `pnpm prisma migrate dev -n init` succeeds against Postgres when DATABASE_URL is set.
+- `pnpm test` runs and all tests pass.
+- Show: (1) file tree, (2) git diff, (3) exact commands, (4) how ACs are satisfied.
+
+Before changing files, outline your plan in ≤5 bullets and WAIT for my OK. Then implement and show artifacts.
