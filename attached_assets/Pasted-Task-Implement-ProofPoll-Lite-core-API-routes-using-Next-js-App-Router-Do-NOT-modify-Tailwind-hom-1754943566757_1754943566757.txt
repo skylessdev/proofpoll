@@ -1,0 +1,58 @@
+Task: Implement ProofPoll Lite core API routes using Next.js App Router.
+Do NOT modify Tailwind, homepage, or Prisma schema.
+
+Guardrails:
+- Next.js API routes only (App Router). No Express/server folder.
+- Keep deps minimal. You may add `zod` for validation.
+- Use the existing Prisma models and /lib/db.ts, /lib/proof.ts.
+- Use Node runtime where needed: `export const runtime = 'nodejs'`.
+
+Create files:
+
+1) POST /app/api/polls/route.ts
+   - Body: { question: string, options: string[], anon?: boolean }
+   - Validate with zod: question 5..200 chars; options length 2..10; trim & dedupe.
+   - Create Poll + Option rows in one transaction.
+   - Return: { id, question, options: [{ id, label }], anon }
+
+2) GET /app/api/polls/[id]/route.ts
+   - Return: { id, question, options: [{ id, label, count }], proofVerified: true }
+   - counts via `Vote` table.
+
+3) POST /app/api/polls/[id]/vote/route.ts
+   - Body: { optionId: string, source: 'slack'|'discord', userId: string }
+   - Derive voterProofId via getVoterProofId(source,userId)
+   - Sign via signVote({ pollId, optionId, voterProofId }) -> proofHash
+   - Insert Vote; enforce @@unique([pollId, voterProofId]) to prevent dupes.
+   - Return: { ok: true, tallies: [{ optionId, count }], proofVerified: true }
+   - On duplicate vote, return 409 with helpful message.
+
+4) Add minimal error helpers for 400/404/409.
+
+Acceptance Criteria:
+- All three endpoints compile and run.
+- `POST /api/polls` creates a poll and options.
+- `POST /api/polls/:id/vote` records a vote; a second vote by same (pollId,voterProofId) returns 409.
+- `GET /api/polls/:id` returns correct tallies and `proofVerified: true`.
+- Provide cURL examples and show responses from local run.
+- Show: file tree, git diff, commands used, and sample JSON outputs.
+
+cURL for verification (fill POLL_ID/OPTION_ID from responses):
+
+# Create poll
+curl -s -X POST http://localhost:3000/api/polls \
+ -H "Content-Type: application/json" \
+ -d '{"question":"Ship next?","options":["A","B"],"anon":false}'
+
+# Get poll
+curl -s http://localhost:3000/api/polls/POLL_ID
+
+# Vote
+curl -s -X POST http://localhost:3000/api/polls/POLL_ID/vote \
+ -H "Content-Type: application/json" \
+ -d '{"optionId":"OPTION_ID","source":"slack","userId":"U123"}'
+
+# Duplicate vote should 409
+curl -i -s -X POST http://localhost:3000/api/polls/POLL_ID/vote \
+ -H "Content-Type: application/json" \
+ -d '{"optionId":"OPTION_ID","source":"slack","userId":"U123"}'
