@@ -29,6 +29,7 @@ model Vote {
   id            String   @id @default(cuid())
   pollId        String
   optionId      String
+  option        Option   @relation(fields: [optionId], references: [id])
   voterProofId  String
   proofHash     String
   createdAt     DateTime @default(now())
