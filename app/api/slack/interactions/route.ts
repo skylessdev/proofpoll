@@ -6,6 +6,11 @@ export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
+    // Handle Slack retries - return 200 immediately to avoid double-processing
+    if (request.headers.get('x-slack-retry-num')) {
+      return new Response('', { status: 200 })
+    }
+    
     // Verify Slack signature
     const { rawBody } = await verifySlack(request)
     
