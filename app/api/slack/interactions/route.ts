@@ -28,87 +28,132 @@ export async function POST(request: NextRequest) {
     if (payload.type === 'block_actions') {
       const action = payload.actions[0]
       const user = payload.user
+      const responseUrl = payload.response_url
       
-      if (!action || !user) {
-        throw new Error('Missing action or user data')
+      if (!action || !user || !responseUrl) {
+        throw new Error('Missing action, user data, or response_url')
       }
       
       // Parse button value
       const { pollId, optionId } = JSON.parse(action.value)
-      
-      // Record vote via our API
       const baseUrl = baseUrlFrom(request)
-      const voteResponse = await fetch(`${baseUrl}/api/polls/${pollId}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          optionId,
-          source: 'slack',
-          userId: user.id
-        })
-      })
       
-      if (voteResponse.status === 409) {
-        // Duplicate vote
-        return NextResponse.json({
-          response_type: 'ephemeral',
-          text: 'You already voted in this poll.'
-        })
-      }
+      // Return 200 immediately to prevent timeout
+      const response = new Response('', { status: 200 })
       
-      if (!voteResponse.ok) {
-        return NextResponse.json({
-          response_type: 'ephemeral',
-          text: 'Error: Failed to record vote'
-        })
-      }
-      
-      const voteResult = await voteResponse.json()
-      
-      // Get updated poll data
-      const pollResponse = await fetch(`${baseUrl}/api/polls/${pollId}`)
-      if (!pollResponse.ok) {
-        return NextResponse.json({
-          response_type: 'ephemeral',
-          text: 'Vote recorded ✅'
-        })
-      }
-      
-      const poll = await pollResponse.json()
-      
-      // Build updated blocks with tallies
-      const blocks = [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*${poll.question}*`
+      // Process vote asynchronously
+      queueMicrotask(async () => {
+        try {
+          // Record vote via our API
+          const voteResponse = await fetch(`${baseUrl}/api/polls/${pollId}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              optionId,
+              source: 'slack',
+              userId: user.id
+            })
+          })
+          
+          if (voteResponse.status === 409) {
+            // Duplicate vote - send ephemeral message
+            await fetch(responseUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                response_type: 'ephemeral',
+                text: 'You already voted in this poll.'
+              })
+            })
+            return
           }
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: poll.options.map((option: any) => 
-              `• *${option.label}*: ${option.count} vote${option.count !== 1 ? 's' : ''}`
-            ).join('\\n')
+          
+          if (!voteResponse.ok) {
+            await fetch(responseUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                response_type: 'ephemeral',
+                text: 'Error: Failed to record vote'
+              })
+            })
+            return
           }
-        },
-        {
-          type: 'context',
-          elements: [
+          
+          // Get updated poll data
+          const pollResponse = await fetch(`${baseUrl}/api/polls/${pollId}`)
+          if (!pollResponse.ok) {
+            await fetch(responseUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                response_type: 'ephemeral',
+                text: 'Vote recorded ✅'
+              })
+            })
+            return
+          }
+          
+          const poll = await pollResponse.json()
+          
+          // Build updated blocks with tallies
+          const blocks = [
             {
-              type: 'mrkdwn',
-              text: `View results: ${baseUrl}/polls/${poll.id}`
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*${poll.question}*`
+              }
+            },
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: poll.options.map((option: any) => 
+                  `• *${option.label}*: ${option.count} vote${option.count !== 1 ? 's' : ''}`
+                ).join('\\n')
+              }
+            },
+            {
+              type: 'context',
+              elements: [
+                {
+                  type: 'mrkdwn',
+                  text: `View results: ${baseUrl}/polls/${poll.id}`
+                }
+              ]
             }
           ]
+          
+          // Update original message with new tallies
+          await fetch(responseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              replace_original: true,
+              blocks
+            })
+          })
+          
+        } catch (error) {
+          console.error('Async vote processing error:', error)
+          // Send error message via response_url
+          try {
+            await fetch(responseUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                response_type: 'ephemeral',
+                text: 'Error processing vote. Please try again.'
+              })
+            })
+          } catch (e) {
+            console.error('Failed to send error response:', e)
+          }
         }
-      ]
-      
-      return NextResponse.json({
-        response_action: 'update',
-        blocks
       })
+      
+      return response
     }
     
     // Unknown interaction type

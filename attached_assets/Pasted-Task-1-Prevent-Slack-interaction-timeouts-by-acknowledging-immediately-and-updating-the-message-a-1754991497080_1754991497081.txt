@@ -1,0 +1,50 @@
+Task: 
+1) Prevent Slack interaction timeouts by acknowledging immediately and updating the message asynchronously via `response_url`.
+2) Add a minimal results page at `/app/polls/[id]/page.tsx`.
+
+Guardrails
+- Next.js App Router only. No Express/server frameworks.
+- No new deps. Use built-in fetch and Node crypto only.
+- Keep existing APIs and DB schema unchanged.
+
+Changes
+
+A) app/api/slack/interactions/route.ts
+- Keep signature verification and URL-encoded parsing.
+- Extract `payload` JSON and read `payload.response_url`.
+- Return `new Response('', { status: 200 })` immediately (within 3s).
+- After returning (use `queueMicrotask` or `setTimeout(0)`), do:
+  - POST `/api/polls/{pollId}/vote` with `{ optionId, source:'slack', userId }`.
+  - On 409: POST to `response_url` with `{ response_type:'ephemeral', text:'You already voted in this poll.' }`.
+  - On success: GET `/api/polls/{pollId}`, build updated blocks with tallies, then POST to `response_url`:
+      {
+        "replace_original": true,
+        "blocks": [ ...updated blocks with counts... ]
+      }
+- Do NOT wait for these async fetches before returning the 200.
+
+B) app/polls/[id]/page.tsx
+- Server component that fetches the poll JSON and renders results.
+- Use request headers to build the absolute base URL (no APP_BASE_URL required):
+    import { headers } from 'next/headers';
+    const h = headers();
+    const proto = h.get('x-forwarded-proto') ?? 'https';
+    const host = h.get('x-forwarded-host') ?? h.get('host');
+    const base = `${proto}://${host}`;
+- GET `${base}/api/polls/${params.id}` with `{ cache: 'no-store' }`.
+- Render:
+  - Title (poll.question)
+  - List of options with counts and a simple % bar (Tailwind ok)
+  - “Last updated just now” note; no auto-refresh required.
+
+Acceptance Criteria
+- Clicking a Slack vote button no longer shows the “Operation timed out” toast.
+- The original Slack message updates with tallies within ~1–2s (via response_url).
+- Duplicate vote shows an ephemeral “You already voted…” message.
+- Visiting `/polls/<id>` shows the poll with correct counts (no 404).
+- No new dependencies added.
+
+Please show:
+- The diff for `app/api/slack/interactions/route.ts`
+- The new file `app/polls/[id]/page.tsx`
+- A short snippet of the POST you send to `response_url`.
