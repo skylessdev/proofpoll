@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@/lib/db'
+import { createDb } from '@/lib/db'
 
 export const runtime = 'nodejs'
 
@@ -25,36 +25,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create poll and options in a transaction
-    const result = await db.$transaction(async (tx) => {
-      const poll = await tx.poll.create({
-        data: {
-          question,
-        }
+    // Use raw SQL queries to bypass prepared statement conflicts
+    const db = createDb()
+    
+    try {
+      const pollId = `cme${Math.random().toString(36).slice(2, 15)}`
+      
+      // Insert poll using raw SQL
+      await db.$executeRaw`INSERT INTO "Poll" (id, question, "createdAt") VALUES (${pollId}, ${question}, NOW())`
+      
+      // Insert options and collect results
+      const options = []
+      for (const label of uniqueOptions) {
+        const optionId = `opt${Math.random().toString(36).slice(2, 15)}`
+        await db.$executeRaw`INSERT INTO "Option" (id, label, "pollId") VALUES (${optionId}, ${label}, ${pollId})`
+        options.push({ id: optionId, label })
+      }
+
+      return NextResponse.json({
+        id: pollId,
+        question,
+        options,
+        anon
       })
+    } finally {
+      await db.$disconnect()
+    }
 
-      const options = await Promise.all(
-        uniqueOptions.map((label) =>
-          tx.option.create({
-            data: {
-              label,
-              pollId: poll.id,
-            }
-          })
-        )
-      )
-
-      return { poll, options }
-    })
-
-    return NextResponse.json({
-      id: result.poll.id,
-      question: result.poll.question,
-      options: result.options.map(opt => ({ id: opt.id, label: opt.label })),
-      anon
-    })
-
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation failed', details: error.issues },
@@ -62,7 +60,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error('Failed to create poll:', error)
+    // Enhanced Prisma error logging
+    console.error('Failed to create poll:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+      clientVersion: error.clientVersion,
+      name: error.name,
+      stack: error.stack?.split('\n').slice(0, 5).join('\n') // First 5 lines only
+    })
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
