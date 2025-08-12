@@ -1,0 +1,65 @@
+Task: Add Slack HTTP integration to ProofPoll Lite using Next.js App Router API routes (no websockets, no Socket Mode, no Express).
+
+Guardrails
+- Do NOT add Express/fastify/Koa or a custom server.
+- Use existing project structure with `app/` API routes.
+- Keep deps minimal (no extra libs). Use Node `crypto` only.
+- All handlers must return within 3s.
+- Show: file tree, git diffs, commands to run, and sample outputs.
+
+Env (assume I already set these in Secrets)
+- SLACK_SIGNING_SECRET
+- SLACK_BOT_TOKEN
+
+Add files
+
+1) `utils/parse.ts`
+   - export `parsePollCommand(raw: string): { question: string; options: string[]; anon?: boolean }`
+   - Supports `/poll "Question with spaces" | A | B | C [--anon]`
+   - Trim, dedupe, require 2..10 options.
+
+2) `lib/slack/verify.ts`
+   - export `async function verifySlack(req: Request): Promise<{ ok: true; rawBody: string; ts: string; sig: string }>`
+   - Implementation:
+     - Read raw body via `await req.text()` BEFORE parsing.
+     - Compute `v0:{timestamp}:{rawBody}` HMAC-SHA256 using `SLACK_SIGNING_SECRET`.
+     - Compare to header `X-Slack-Signature` (constant-time).
+     - Reject if timestamp older than 5 minutes.
+   - NOTE: Slash commands & interactivity both send `content-type: application/x-www-form-urlencoded`. Do NOT JSON.parse raw body.
+
+3) `app/api/slack/commands/route.ts`  (POST)
+   - `export const runtime = 'nodejs'`
+   - Call `verifySlack(req)`; parse body as `new URLSearchParams(rawBody)`.
+   - Extract `user_id`, `channel_id`, `text`.
+   - Use `parsePollCommand(text)`, then call our local API `POST /api/polls` to create the poll.
+   - Respond with JSON blocks (immediate 200) shaped for Slack:
+     - Section: *Question*
+     - Actions: one button per option with `value` = JSON string `{ pollId, optionId }`
+     - Context: “View results: https://<host>/poll/{id}”
+   - Return body: `{ response_type: 'in_channel', blocks: [...] }`
+
+4) `app/api/slack/interactions/route.ts`  (POST)
+   - `export const runtime = 'nodejs'`
+   - `verifySlack(req)`; parse `payload` from `new URLSearchParams(rawBody).get('payload')!`; then `JSON.parse`.
+   - If type is `block_actions` for our buttons:
+     - Read `{ pollId, optionId }` from `action.value`
+     - Call local `POST /api/polls/{pollId}/vote` with `{ optionId, source:'slack', userId: body.user.id }`
+     - On success: return `{ response_action: 'update', blocks: <updated blocks with tallies> }` OR ephemeral message `"Vote recorded ✅"`.
+     - On duplicate (409): return ephemeral `"You already voted in this poll."`
+
+5) Small helper for building base URL from request:
+   - `lib/http.ts` → `export function baseUrlFrom(req: Request) { const h=req.headers.get('x-forwarded-host')||req.headers.get('host'); const p=req.headers.get('x-forwarded-proto')||'https'; return \`\${p}://\${h}\`; }`
+   - Use it to generate the “View results” link without needing APP_BASE_URL.
+
+Acceptance Criteria
+- `/api/slack/commands` verifies signature and returns blocks for `/poll "Ship?" | Yes | No`.
+- `/api/slack/interactions` verifies signature, records a vote, and handles duplicate with a friendly message.
+- No new server frameworks; only Next.js routes and Node crypto.
+- Provide:
+  - Example curl (url-encoded) to simulate a slash command & button payload.
+  - The exact JSON blocks returned by `/commands`.
+  - A short note with the two Slack URLs I should paste:
+    - Slash Commands → Request URL → `<public-base>/api/slack/commands`
+    - Interactivity → Request URL → `<public-base>/api/slack/interactions`
+
+Before modifying files, outline your plan in ≤5 bullets and WAIT for my OK. Then implement and show artifacts.
