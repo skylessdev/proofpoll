@@ -1,0 +1,76 @@
+Task: Add Discord slash command + button voting via HTTP Interactions only (no gateway/websocket).
+
+Guardrails
+- Next.js App Router routes only.
+- No external libs EXCEPT `tweetnacl` for Ed25519 signature verification.
+- Keep current DB/schema and Slack code unchanged.
+
+Env
+- DISCORD_PUBLIC_KEY  (hex from Discord portal)
+- DISCORD_APP_ID      (for command registration JSON)
+- DISCORD_BOT_TOKEN   (optional; only needed if we later call REST)
+
+Add files
+
+1) lib/discord/verify.ts
+   - import nacl from 'tweetnacl'
+   - export async function verifyDiscord(req: Request):
+     - const raw = await req.text()
+     - const sig = req.headers.get('x-signature-ed25519')
+     - const ts  = req.headers.get('x-signature-timestamp')
+     - Validate presence; then:
+       const ok = nacl.sign.detached.verify(
+         Buffer.from(ts + raw),
+         Buffer.from(sig!, 'hex'),
+         Buffer.from(process.env.DISCORD_PUBLIC_KEY!, 'hex')
+       );
+     - if (!ok) throw new Error('Invalid signature');
+     - return { rawBody: raw };
+
+2) app/api/discord/interactions/route.ts  (POST)
+   - export const runtime = 'nodejs'
+   - const { rawBody } = await verifyDiscord(req)
+   - const body = JSON.parse(rawBody)
+
+   - if (body.type === 1) return NextResponse.json({ type: 1 })   // PING
+
+   - if (body.type === 2 && body.data?.name === 'poll'):
+       // body.data.options[0].value holds the text, e.g. `"Question" | A | B | C [--anon]`
+       const { question, options, anon } = parsePollCommand(body.data.options?.[0]?.value ?? '')
+       // create poll via POST /api/polls
+       // build message with buttons:
+       // components: [{ type: 1, components: [{ type: 2, style: 1, label, custom_id: JSON.stringify({pollId, optionId}) }... ]}]
+       // and a link button to /polls/{id}
+       return NextResponse.json({
+         type: 4, // CHANNEL_MESSAGE_WITH_SOURCE
+         data: { content: `**${question}**`, components, flags: 0 }
+       })
+
+   - if (body.type === 3 && body.data?.component_type === 2):
+       const { pollId, optionId } = JSON.parse(body.data.custom_id)
+       const userId = body.member.user.id
+       // POST vote; on 409 -> ephemeral error
+       // On success -> GET tallies and respond with type 7 (UPDATE_MESSAGE) + new components/content
+       // Duplicate:
+       // return NextResponse.json({ type: 4, data: { content: 'You already voted.', flags: 64 } })
+
+3) utils/discord.ts
+   - tiny helpers to build button rows and the updated tally text.
+
+Provide
+- File tree + git diff.
+- Example **command registration JSON**:
+  {
+    "name": "poll",
+    "description": "Create a poll",
+    "type": 1,
+    "options": [
+      { "name": "text", "description": "Format: \"Question\" | A | B | C [--anon]", "type": 3, "required": true }
+    ]
+  }
+- Portal settings I must set:
+  - Interactions Endpoint URL → `<public-base>/api/discord/interactions`
+  - Public Key (copied into DISCORD_PUBLIC_KEY)
+  - (Optional) Install the bot to a server and add the global command.
+
+Before editing, outline plan in ≤5 bullets and wait for my OK.
