@@ -2,7 +2,26 @@
 
 ## Overview
 
-ProofPoll Lite is a lightweight polling application designed with cryptographic proof mechanisms. The project is built using modern web technologies including Next.js 14 with the App Router, TypeScript for type safety, Tailwind CSS for responsive styling, and Prisma as the database ORM. The application is structured for Vercel deployment and focuses on providing a secure, scalable polling platform with built-in proof verification capabilities.
+ProofPoll Lite is a lightweight polling application with cryptographic proof mechanisms and messaging platform integrations. Built using Next.js 14 with App Router, TypeScript, Tailwind CSS, and Prisma ORM, the application provides secure polling with HMAC-SHA256 vote verification. The system includes fully operational Slack integration with slash commands and interactive buttons, plus Discord integration ready for deployment.
+
+## Recent Changes (August 2025)
+
+### Database Resolution
+- **Session Pooler Migration**: Resolved PostgreSQL prepared statement conflicts (42P05) by switching from Transaction Pooler (port 6543) to Session Pooler (port 5432)
+- **Cryptographic Proofs**: HMAC-SHA256 proof system verified as fully active with voterProofId and proofHash generation
+
+### Slack Integration - LIVE ✅
+- **Live Testing Confirmed**: End-to-end Slack integration verified operational on August 17, 2025
+- **Request URLs Active**: Both `/api/slack/commands` and `/api/slack/interactions` responding correctly
+- **Signature Verification**: HMAC-SHA256 signature validation working (timestamp delta ~1s)
+- **Vote Flow Complete**: `/poll` command → button interactions → vote recording → response updates
+- **Environment**: SLACK_SIGNING_SECRET and SLACK_BOT_TOKEN configured, SLACK_CHANNEL_ID not required
+
+### Discord Integration - CODE COMPLETE
+- **Endpoints Ready**: `/api/discord/interactions` with Ed25519 signature verification
+- **Command Structure**: Poll slash command JSON defined for registration
+- **Environment**: DISCORD_PUBLIC_KEY and DISCORD_APP_ID configured
+- **Status**: Ready for portal configuration (Interactions URL + command registration)
 
 ## User Preferences
 
