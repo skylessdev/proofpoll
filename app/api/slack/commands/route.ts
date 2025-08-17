@@ -12,8 +12,29 @@ export async function POST(request: NextRequest) {
       return new Response('', { status: 200 })
     }
     
+    const timestamp = new Date().toISOString()
+    const remoteIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const slackTimestamp = request.headers.get('x-slack-request-timestamp') || 'missing'
+    const currentTime = Math.floor(Date.now() / 1000)
+    const timestampDelta = slackTimestamp !== 'missing' ? currentTime - parseInt(slackTimestamp) : 'N/A'
+    
+    console.log(`[${timestamp}] SLACK COMMAND - Method: POST, Path: /api/slack/commands, Remote IP: ${remoteIP}, X-Slack-Request-Timestamp: ${slackTimestamp}, Delta: ${timestampDelta}s`)
+    
+    // Get baseUrl for logging
+    const baseUrl = baseUrlFrom(request)
+    console.log(`[${timestamp}] Server believes base URL: ${baseUrl}`)
+    
     // Verify Slack signature
-    const { rawBody } = await verifySlack(request)
+    let verifyResult: any
+    try {
+      verifyResult = await verifySlack(request)
+      console.log(`[${timestamp}] verifySlack() PASS - signature validated`)
+    } catch (error: any) {
+      console.log(`[${timestamp}] verifySlack() FAIL - ${error.message}`)
+      throw error
+    }
+    
+    const { rawBody } = verifyResult
     
     // Parse URL-encoded body
     const params = new URLSearchParams(rawBody)
@@ -39,8 +60,7 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // Create poll via our API
-    const baseUrl = baseUrlFrom(request)
+    // Create poll via our API (baseUrl already logged above)
     const pollResponse = await fetch(`${baseUrl}/api/polls`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -88,10 +108,14 @@ export async function POST(request: NextRequest) {
       }
     ]
     
-    return NextResponse.json({
+    const response = {
       response_type: 'in_channel',
       blocks
-    })
+    }
+    
+    console.log(`[${timestamp}] Returning JSON response: ${JSON.stringify(response).substring(0, 150)}...`)
+    
+    return NextResponse.json(response)
     
   } catch (error: any) {
     console.error('Slack command error:', error)
