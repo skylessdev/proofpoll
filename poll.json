@@ -1,0 +1,12 @@
+{
+  "name": "poll",
+  "description": "Create a poll with multiple options",
+  "options": [
+    {
+      "name": "text",
+      "description": "Poll question and options (e.g., 'What's for lunch? Pizza, Burgers, Salad')",
+      "type": 3,
+      "required": true
+    }
+  ]
+}
