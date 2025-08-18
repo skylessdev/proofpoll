@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      NODE_ENV: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # SPDX header check (fails if any target file lacks the header)
+      - name: Verify SPDX headers
+        run: node scripts/verify-headers.mjs
+
+      # Generate Prisma client explicitly (don't rely on postinstall)
+      - name: Prisma generate
+        run: npx prisma generate
+
+      # Build Next.js directly, even if no "build" script exists
+      - name: Build
+        run: npx next build
