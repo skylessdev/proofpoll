@@ -25,6 +25,14 @@ ProofPoll Lite is a lightweight polling application with cryptographic proof mec
 - **Environment**: DISCORD_PUBLIC_KEY and DISCORD_APP_ID configured
 - **Status**: Ready for Discord Developer Portal PING test and command registration
 
+### Production Deployment - CONFIGURED ✅
+- **Deployment URL**: https://proofpoll.replit.app
+- **Health Check**: `/api/health` endpoint operational with database connectivity validation
+- **Build Configuration**: Production build successful with TypeScript validation
+- **Environment**: All required secrets configured (DATABASE_URL, PROOF_SECRET, Slack/Discord keys)
+- **Development**: Hot reload with Prisma generation via Run button
+- **Production**: Optimized build with static generation for deployment
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
