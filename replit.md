@@ -6,6 +6,14 @@ ProofPoll Lite is a lightweight polling application with cryptographic proof mec
 
 ## Recent Changes (August 2025)
 
+### License Headers Implementation (August 18, 2025) ✅
+- **SPDX Headers Added**: Added dual-license SPDX headers `(MIT OR MPL-2.0)` to all 24 source files
+- **Pragma Safety**: Headers placed after Next.js pragmas ('use client'/'use server'), shebangs, and TypeScript directives to preserve functionality
+- **Comment Syntax**: Correct comment syntax per file type (/* */ for TS/JS/CSS, // for Prisma)
+- **Idempotent Script**: Created `scripts/add-headers.mjs` with dry-run and write modes, skips node_modules/.next/etc.
+- **README Updated**: Added license section with copyright notice for Skyless Innovation
+- **Verification**: All 24 files updated successfully, application still functional, script won't duplicate headers
+
 ### Database Resolution
 - **Session Pooler Migration**: Resolved PostgreSQL prepared statement conflicts (42P05) by switching from Transaction Pooler (port 6543) to Session Pooler (port 5432)
 - **Cryptographic Proofs**: HMAC-SHA256 proof system verified as fully active with voterProofId and proofHash generation

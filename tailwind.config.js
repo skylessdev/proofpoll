@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [

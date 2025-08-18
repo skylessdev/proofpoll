@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 

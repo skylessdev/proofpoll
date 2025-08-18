@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 import { describe, it, expect, beforeAll } from 'vitest'
 import { getVoterProofId, signVote } from '../lib/proof'
 

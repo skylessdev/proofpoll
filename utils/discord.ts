@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 interface Poll {
   id: string
   question: string

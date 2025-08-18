@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 export function parsePollCommand(raw: string): { question: string; options: string[]; anon?: boolean } {
   // Remove leading/trailing whitespace
   const text = raw.trim()

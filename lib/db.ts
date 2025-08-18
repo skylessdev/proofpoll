@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 import { PrismaClient } from '@prisma/client'
 
 // Create fresh client for each request to avoid prepared statement conflicts

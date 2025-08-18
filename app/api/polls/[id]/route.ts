@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 

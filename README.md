@@ -14,4 +14,23 @@ A lightweight polling application built with Next.js 14, TypeScript, Tailwind CS
 
 1. Install dependencies:
 ```bash
-pnpm install
+npm install
+```
+
+2. Set up your database:
+```bash
+npx prisma migrate dev
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## License
+
+Files include SPDX-License-Identifier: (MIT OR MPL-2.0) headers.
+
+© 2025 Skyless Innovation — dual licensed MIT/MPL-2.0

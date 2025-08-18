@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 import nacl from 'tweetnacl'
 
 const hexToUint8Array = (hex: string) =>

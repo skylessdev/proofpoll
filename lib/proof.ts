@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 import { createHmac } from 'crypto'
 
 export function getVoterProofId(source: 'slack' | 'discord', userId: string): string {
