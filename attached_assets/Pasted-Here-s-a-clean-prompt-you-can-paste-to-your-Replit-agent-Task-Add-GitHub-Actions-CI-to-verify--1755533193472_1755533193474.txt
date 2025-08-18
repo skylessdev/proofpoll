@@ -1,0 +1,80 @@
+Here’s a clean prompt you can paste to your Replit agent:
+
+⸻
+
+Task: Add GitHub Actions CI to verify SPDX headers and build the app
+
+Goal
+	•	Create a single workflow .github/workflows/ci.yml that:
+	1.	Verifies SPDX headers via node scripts/verify-headers.mjs
+	2.	Builds the Next.js project to ensure it compiles
+
+Guardrails
+	•	Do not modify application code or env usage.
+	•	Do not add dependencies.
+	•	Use Node.js 20.
+	•	CI must not require secrets; skip Slack/Discord calls.
+	•	Keep the existing license-check.yml if present, but prefer the new ci.yml as the primary workflow.
+
+Implementation Steps
+	1.	Add .github/workflows/ci.yml with this content:
+
+name: License & Build
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      NODE_ENV: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Verify SPDX headers
+        run: node scripts/verify-headers.mjs
+
+      - name: Build
+        run: npm run build
+
+	2.	Ensure the project has a build script in package.json (should already exist via Next.js). If missing, add:
+
+"scripts": {
+  "build": "next build"
+}
+
+(If package.json is read-only via agent, report back; do not force-edit.)
+	3.	Keep existing workflow(s) intact, but mention in the PR description that ci.yml supersedes them for full checks.
+
+Acceptance Criteria
+	•	.github/workflows/ci.yml exists with the exact content above.
+	•	npm run build completes in CI without requiring secrets.
+	•	node scripts/verify-headers.mjs runs and passes in CI.
+	•	Provide:
+	•	File tree snippet showing .github/workflows/ci.yml
+	•	git diff --stat summary
+	•	A link/instructions to view the workflow run in GitHub Actions
+
+Before changing files
+	•	Show a short plan (≤5 bullets) and WAIT for my OK.
