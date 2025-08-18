@@ -17,11 +17,13 @@ ProofPoll Lite is a lightweight polling application with cryptographic proof mec
 - **Vote Flow Complete**: `/poll` command → button interactions → vote recording → response updates
 - **Environment**: SLACK_SIGNING_SECRET and SLACK_BOT_TOKEN configured, SLACK_CHANNEL_ID not required
 
-### Discord Integration - CODE COMPLETE
-- **Endpoints Ready**: `/api/discord/interactions` with Ed25519 signature verification
+### Discord Integration - VERIFICATION FIXED ✅
+- **Signature Verification**: Ed25519 verification hardened with proper encoding and 401 error handling
+- **Endpoints Ready**: `/api/discord/interactions` returns 401 for invalid signatures, handles PING correctly
+- **Debug Logging**: Added verification trace logs (headers, body length, PASS/FAIL status)
 - **Command Structure**: Poll slash command JSON defined for registration
 - **Environment**: DISCORD_PUBLIC_KEY and DISCORD_APP_ID configured
-- **Status**: Ready for portal configuration (Interactions URL + command registration)
+- **Status**: Ready for Discord Developer Portal PING test and command registration
 
 ## User Preferences
 

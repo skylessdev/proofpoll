@@ -8,7 +8,7 @@ export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify Discord signature
+    // Verify Discord signature first, before any JSON parsing
     const { rawBody } = await verifyDiscord(request)
     const body = JSON.parse(rawBody)
     
@@ -154,6 +154,14 @@ export async function POST(request: NextRequest) {
     
   } catch (error: any) {
     console.error('Discord interaction error:', error)
+    
+    // Return 401 for signature verification failures
+    if (error.message.includes('Discord signature') || 
+        error.message.includes('Missing Discord') || 
+        error.message.includes('bad signature size')) {
+      return new Response('invalid request signature', { status: 401 })
+    }
+    
     return NextResponse.json({
       type: 4,
       data: {

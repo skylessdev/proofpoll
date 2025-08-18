@@ -1,0 +1,66 @@
+Goal: Fix Discord HTTP Interactions failing with “Invalid Discord signature”. Ensure we verify against the raw request body (no JSON parsing before verify), per Discord docs (timestamp + body, Ed25519). Add concise debug logs, and return proper HTTP 401 on bad signatures.
+
+Tasks
+	1.	Audit & patch verification
+	•	Files to inspect:
+	•	lib/discord/verify.ts
+	•	app/api/discord/interactions/route.ts
+	•	Requirements:
+	•	Read the raw body with await req.text() before any parsing.
+	•	Fetch headers: x-signature-ed25519, x-signature-timestamp.
+	•	Verify with tweetnacl.sign.detached.verify using:
+	•	message = new TextEncoder().encode(timestamp + rawBody)
+	•	signature = hexToUint8Array(sigHex)
+	•	publicKey = hexToUint8Array(process.env.DISCORD_PUBLIC_KEY!)
+	•	If missing headers or verification fails: return new Response('invalid request signature', { status: 401 }) (not 200).
+	•	Export in route.ts: export const runtime = 'nodejs'.
+	•	Ensure nothing calls request.json() until after verification succeeds.
+	2.	Harden verifyDiscord
+	•	Implement small helpers in lib/discord/verify.ts:
+
+const hexToUint8Array = (hex: string) =>
+  new Uint8Array(hex.match(/.{1,2}/g)!.map(b => parseInt(b, 16)));
+
+
+	•	Return { rawBody } on success so the handler can JSON.parse(rawBody) safely.
+
+	3.	Add lightweight trace logs (dev only)
+	•	In verifyDiscord, log once per request:
+	•	Whether headers exist
+	•	Raw body length
+	•	PASS/FAIL result
+	•	Keep logs concise; no secrets, no full payloads.
+	4.	Handler flow (app/api/discord/interactions/route.ts)
+	•	Pseudocode:
+
+export const runtime = 'nodejs';
+export async function POST(req: NextRequest) {
+  // 1) Verify first, using raw body.
+  const { rawBody } = await verifyDiscord(req);
+  // 2) Parse after verification.
+  const body = JSON.parse(rawBody);
+  // 3) Handle types:
+  //    - type === 1 (PING): return { type: 1 }
+  //    - type === 2 (APPLICATION_COMMAND 'poll'): create poll, return buttons (type 4)
+  //    - type === 3 (MESSAGE_COMPONENT): record vote, return type 7 update
+}
+
+
+	•	If verifyDiscord throws for bad signature, the route should catch and return 401 (not 200).
+
+	5.	Tests
+	•	Trigger a real PING by re-saving the “Interactions Endpoint URL” in the Discord Dev Portal (General Information).
+	•	Show server logs indicating:
+	•	headers present
+	•	rawBody length > 0
+	•	Verification PASS
+	•	Response { type: 1 } for PING
+	•	Negative test with curl (fake headers) returning 401.
+
+Acceptance criteria
+	•	Saving the Interactions Endpoint URL in the portal yields 200 OK with body {"type":1} (PING), and logs show Verification PASS.
+	•	Bad signature requests return 401 invalid request signature.
+	•	No Invalid Discord signature errors in logs for real Discord requests.
+	•	No JSON parsing occurs prior to signature verification.
+
+⸻
