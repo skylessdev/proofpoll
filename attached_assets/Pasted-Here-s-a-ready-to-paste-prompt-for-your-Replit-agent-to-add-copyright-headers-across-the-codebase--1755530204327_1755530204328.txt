@@ -1,0 +1,89 @@
+Here’s a ready-to-paste prompt for your Replit agent to add copyright headers across the codebase.
+
+⸻
+
+Task: Add dual-license copyright headers to source files (MIT + MPL 2.0)
+
+Goal
+	•	Insert a standard header at the top of applicable source files:
+
+/*
+ * Copyright (c) 2025 Skyless Innovation
+ * Dual licensed under the MIT License and the Mozilla Public License 2.0.
+ * See LICENSE-MIT and LICENSE-MPL-2.0 at the repository root.
+ */
+
+
+	•	Use correct comment syntax per file type.
+	•	Idempotent: do not duplicate if header already present.
+	•	Preserve any shebangs (#!/usr/bin/env node) by inserting below them.
+	•	Do not modify application logic.
+
+Guardrails
+	•	Do not touch secrets, env files, or compiled artifacts.
+	•	Do not alter code behavior.
+	•	Keep existing README content; no unrelated rewrites.
+	•	Respect file-type comment styles:
+	•	TS/TSX/JS/JSX/CSS → /* ... */
+	•	.prisma / .sql / .env.example → // ... (for .sql use -- ...)
+	•	JSON/MD → skip (no comments)
+	•	Skip: node_modules, .next, out, .vercel, .replit, attached_assets, *.min.*, *.map.
+
+Target globs
+	•	app/**/*.{ts,tsx,js,jsx,css}
+	•	lib/**/*.{ts,tsx,js,jsx}
+	•	utils/**/*.{ts,tsx,js,jsx}
+	•	prisma/**/*.prisma
+	•	**/*.sql (if present)
+
+Steps
+	1.	Create a small Node script scripts/add-headers.mjs that:
+	•	Walks the repo (respecting the skip paths above).
+	•	Detects the correct comment style per file.
+	•	If the first non-shebang, non-empty lines don’t already contain “Skyless Innovation” or “Dual licensed”, insert the header.
+	•	For files with a shebang, place header after the shebang line.
+	•	Print a summary: files updated / skipped.
+	2.	Run the script and commit changes.
+	3.	Update the README License section footer with:
+© 2025 Skyless Innovation — dual licensed MIT/MPL-2.0 (if not already present).
+	4.	Show artifacts: file tree changes, diff sample for 3–5 files, and script output summary.
+
+Header templates
+	•	Block style (default: ts/tsx/js/jsx/css):
+
+/*
+ * Copyright (c) 2025 Skyless Innovation
+ * Dual licensed under the MIT License and the Mozilla Public License 2.0.
+ * See LICENSE-MIT and LICENSE-MPL-2.0 at the repository root.
+ */
+
+
+	•	Line style (for .prisma):
+
+
+
+
+
+// Copyright (c) 2025 Skyless Innovation
+// Dual licensed under the MIT License and the Mozilla Public License 2.0.
+// See LICENSE-MIT and LICENSE-MPL-2.0 at the repository root.
+
+- **SQL style (for .sql):**
+
+– Copyright (c) 2025 Skyless Innovation
+– Dual licensed under the MIT License and the Mozilla Public License 2.0.
+– See LICENSE-MIT and LICENSE-MPL-2.0 at the repository root.
+
+**Acceptance Criteria**  
+- Headers added to all target files using correct comment syntax.
+- No duplicate headers; shebangs preserved.
+- README updated with the copyright footer.
+- `git status` clean after commit; provide diff summary and script log.
+
+**(Optional nicety)**  
+- Make the year dynamic in the script (e.g., `new Date().getFullYear()`), but keep 2025 as current output.
+
+**Before applying changes**  
+- Show a short plan (≤5 bullets). Wait for my OK, then implement and report artifacts.
+
+---
