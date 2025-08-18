@@ -18,12 +18,15 @@ ProofPoll Lite is a lightweight polling application with cryptographic proof mec
 - **Session Pooler Migration**: Resolved PostgreSQL prepared statement conflicts (42P05) by switching from Transaction Pooler (port 6543) to Session Pooler (port 5432)
 - **Cryptographic Proofs**: HMAC-SHA256 proof system verified as fully active with voterProofId and proofHash generation
 
-### Slack Integration - LIVE ✅
+### Slack Integration - LIVE ✅  
 - **Live Testing Confirmed**: End-to-end Slack integration verified operational on August 17, 2025
 - **Request URLs Active**: Both `/api/slack/commands` and `/api/slack/interactions` responding correctly
 - **Signature Verification**: HMAC-SHA256 signature validation working (timestamp delta ~1s)
 - **Vote Flow Complete**: `/poll` command → button interactions → vote recording → response updates
 - **Environment**: SLACK_SIGNING_SECRET and SLACK_BOT_TOKEN configured, SLACK_CHANNEL_ID not required
+- **OAuth Integration Added**: `/api/slack/oauth_redirect` endpoint for workspace installation (August 18, 2025)
+- **Team Persistence**: SlackTeam model stores accessToken, botUserId, teamName for each workspace
+- **Full App Installation**: Complete OAuth flow with success page and database persistence
 
 ### Discord Integration - VERIFICATION FIXED ✅
 - **Signature Verification**: Ed25519 verification hardened with proper encoding and 401 error handling

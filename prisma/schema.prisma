@@ -37,3 +37,11 @@ model Vote {
   createdAt     DateTime @default(now())
   @@unique([pollId, voterProofId])
 }
+
+model SlackTeam {
+  id          String   @id  // Slack workspace/team ID
+  accessToken String
+  botUserId   String
+  teamName    String
+  installedAt DateTime @default(now())
+}
