@@ -1,0 +1,9 @@
+# Global code ownership
+* @skylessinnovation
+
+# Critical security and infrastructure files
+/.github/ @skylessinnovation
+/prisma/ @skylessinnovation
+/scripts/ @skylessinnovation
+SECURITY.md @skylessinnovation
+LICENSE-* @skylessinnovation

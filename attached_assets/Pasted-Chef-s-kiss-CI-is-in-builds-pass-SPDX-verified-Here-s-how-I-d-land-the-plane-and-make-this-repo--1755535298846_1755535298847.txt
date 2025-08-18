@@ -1,0 +1,81 @@
+Chef’s kiss. CI is in, builds pass, SPDX verified. Here’s how I’d land the plane and make this repo feel “ship-grade.”
+
+## Quick next steps
+
+1. **Push & badge**
+
+   * Push to GitHub (if not already).
+   * Add a CI badge near the top of the README:
+
+     ```md
+     [![CI](https://github.com/<you>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<you>/<repo>/actions/workflows/ci.yml)
+     ```
+
+2. **Branch protection**
+
+   * Protect `main`: require the **CI** workflow to pass before merge; require PR reviews.
+
+3. **Vercel hookup**
+
+   * Import the repo in Vercel.
+   * Add env vars there (DATABASE\_URL session pooler 5432, PROOF\_SECRET, Slack/Discord keys).
+   * Update Slack/Discord portal URLs to your Vercel domain.
+
+4. **Security & governance (tiny but pro)**
+
+   * `SECURITY.md` (how to report vulns):
+
+     ```md
+     # Security Policy
+     Please email security@<yourdomain> for vulnerabilities. We aim to acknowledge within 72h.
+     ```
+   * `CODEOWNERS` (routes PRs to you):
+
+     ```
+     *  @<your-gh-handle>
+     ```
+
+5. **Automation candy (optional but nice)**
+
+   * **Dependabot** for npm updates:
+
+     ```yaml
+     # .github/dependabot.yml
+     version: 2
+     updates:
+       - package-ecosystem: "npm"
+         directory: "/"
+         schedule:
+           interval: "weekly"
+     ```
+   * **Release notes** via GitHub’s Releases (tag `v0.1.0`, add highlights).
+
+6. **Docs polish**
+
+   * Add 2–3 screenshots (Slack poll, Discord poll, results page) and link them in README.
+   * Add the CI badge + License badges:
+
+     ```md
+     [![License: MIT/MPL-2.0](https://img.shields.io/badge/license-MIT%20or%20MPL--2.0-blue.svg)](#license)
+     ```
+
+## Optional files I can drop in (say the word)
+
+* `SECURITY.md`, `CODEOWNERS`, `dependabot.yml`
+* A “smoke test” script that:
+
+  * POSTs `/api/polls`
+  * POSTs `/api/polls/:id/vote`
+  * GETs `/api/polls/:id`
+* Issue/PR templates (`.github/ISSUE_TEMPLATE/bug.md`, `feature.md`, `PULL_REQUEST_TEMPLATE.md`)
+
+## Ship checklist (concise)
+
+* [ ] README has CI + license badges
+* [ ] Branch protection requires CI ✓
+* [ ] Vercel env vars set (session pooler 5432)
+* [ ] Slack/Discord URLs updated to production domain
+* [ ] RELEASE `v0.1.0` created
+* [ ] (Optional) Dependabot + SECURITY.md + CODEOWNERS
+
+If you want, I’ll generate those optional files exactly as above and add the README badges in one pass.
