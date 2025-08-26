@@ -1,0 +1,158 @@
+boom — you nailed it. Prod + dev ports are cleanly split, build script in place, SPDX header verified, and both servers are healthy. Here’s a tight wrap-up + the last small things to check off.
+
+Final “ready to ship” checklist
+	•	package.json
+	•	dev: npx prisma generate && next dev --port 5000
+	•	build: next build
+	•	start:prod: npx prisma generate && next start -p 5001
+	•	Replit Deploy (Production)
+	•	Build: npx next build
+	•	Start: npx prisma generate && npx next start -p 5001
+	•	HTTP Port: 5001
+	•	Health Check: /api/health
+	•	Licensing
+	•	prisma/schema.prisma first line: /* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+	•	(Your CI should stay green.)
+
+Quick health pings (copy/paste)
+
+# dev (hot reload)
+curl -s http://localhost:5000/api/health
+
+# prod (replit deploy port)
+curl -s http://localhost:5001/api/health
+
+Slack: distribution ready steps (one-time)
+
+From Manage Distribution in your Slack app:
+	1.	Sharable Install URL (already visible there)
+That’s what you can share for installs to your own workspace.
+	2.	Public distribution (optional, for other workspaces)
+	•	Ensure features show green: Incoming Webhooks (if you use), Interactive Components, Slash Commands, Bots, Permissions.
+	•	OAuth Redirect URIs must include:
+	•	https://proofpoll.replit.app/api/slack/oauth_redirect
+	•	Check Remove Hard Coded Information (you’re using env vars).
+	•	Click Activate Public Distribution when you’re ready to let anyone install.
+	•	Your install link will be under “Share Your App with Other Workspaces”.
+	3.	Slash command points to prod
+	•	/poll → https://proofpoll.replit.app/api/slack/commands
+	•	Interactivity → https://proofpoll.replit.app/api/slack/interactions
+
+Discord: nothing else needed for global
+
+You already registered /poll globally. Anyone can add the app with the standard Install Link from the Developer Portal; command appears instantly in guilds where it’s added.
+
+Nice-to-have polish (optional)
+	•	Add the Replit Deploy URL + Slack install link to the README “Getting Started”.
+	•	Run the repo smoke test after deploy:
+
+node scripts/smoke-test.mjs
+
+
+	•	Keep both 5000 (dev) and 5001 (prod) habits consistent to avoid accidental clashes.
+
+Here’s a polished “Install to Slack” section you can drop straight into your README.md. It walks new users through the flow with the exact sharable link you now have in Slack’s Manage Distribution tab:
+
+⸻
+
+🚀 Install to Slack
+
+You can add ProofPoll Lite to your Slack workspace in just a few steps:
+
+1. Click the Install Link
+
+Use the official Slack OAuth install link:
+
+https://slack.com/oauth/v2/authorize?client_id=YOUR_SLACK_CLIENT_ID&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect
+
+Replace YOUR_SLACK_CLIENT_ID with the client_id shown in your Slack app’s Manage Distribution screen.
+The redirect URI is already configured in your app and points to the hosted ProofPoll Lite backend.
+
+2. Authorize in Slack
+	•	Choose your workspace
+	•	Approve the requested permissions (/poll slash command, posting messages)
+
+3. Test the /poll Command
+
+Once installed:
+	1.	Open any channel in your workspace
+	2.	Type:
+
+/poll "What’s your favorite language?" "JavaScript" "Python" "TypeScript"
+
+
+	3.	ProofPoll Lite will post an interactive poll to the channel. Votes are stored with verifiable proofs.
+
+⸻
+
+✅ This makes the README self-serve: anyone can add ProofPoll Lite to their own Slack with the link, no manual setup required.
+
+Perfect — here’s the Discord install section you can add right under your Slack one in the README. It mirrors the style and makes the repo fully self-serve for both integrations:
+
+⸻
+
+🎮 Install to Discord
+
+Bring ProofPoll Lite into your Discord server:
+
+1. Invite the Bot
+
+Click this link to add the bot to any server you manage:
+
+https://discord.com/oauth2/authorize?client_id=YOUR_DISCORD_APP_ID&scope=applications.commands+bot&permissions=0
+
+Replace YOUR_DISCORD_APP_ID with the application ID from your Discord Developer Portal.
+The bot requires minimal permissions — just enough to post polls and handle interactions.
+
+2. Verify Interactions Endpoint
+
+In the Discord Developer Portal → General Information, ensure the Interactions Endpoint URL is set to:
+
+https://proofpoll.replit.app/api/discord/interactions
+
+This allows Discord to verify and forward slash commands and button clicks.
+
+3. Use the /poll Command
+
+Once installed:
+	1.	In any channel, type:
+
+/poll text:"What’s your favorite editor? VSCode, Vim, Emacs"
+
+
+	2.	The bot will create a live poll with voting buttons.
+	3.	Votes are validated and stored with cryptographic proofs.
+
+⸻
+
+✅ Now the README explains both Slack and Discord setup clearly.
+
+Great — let’s add a Quick Links badge row right at the top of your README so visitors can immediately install ProofPoll Lite to Slack or Discord, view docs, or deploy.
+
+Here’s a snippet you can drop in just under the title line in your README.md:
+
+<p align="center">
+  <a href="https://slack.com/oauth/v2/authorize?client_id=YOUR_SLACK_CLIENT_ID&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect">
+    <img alt="Install Slack" src="https://img.shields.io/badge/Slack-Install%20App-4A154B?logo=slack&logoColor=white" />
+  </a>
+  &nbsp;
+  <a href="https://discord.com/oauth2/authorize?client_id=YOUR_DISCORD_APP_ID&scope=applications.commands+bot&permissions=0">
+    <img alt="Invite Discord" src="https://img.shields.io/badge/Discord-Invite%20Bot-5865F2?logo=discord&logoColor=white" />
+  </a>
+  &nbsp;
+  <a href="https://proofpoll.replit.app/">
+    <img alt="Docs" src="https://img.shields.io/badge/Docs-Read%20More-00B0F0?logo=readthedocs&logoColor=white" />
+  </a>
+  &nbsp;
+  <a href="https://replit.com/@skylessdev/ProofPollLite">
+    <img alt="Deploy on Replit" src="https://img.shields.io/badge/Replit-Deploy-FF6C37?logo=replit&logoColor=white" />
+  </a>
+</p>
+
+
+⸻
+
+Notes
+	•	Replace YOUR_SLACK_CLIENT_ID and YOUR_DISCORD_APP_ID with your actual IDs from the app portals.
+	•	This will render a clean row of clickable badges at the very top of the README.
+	•	They’ll work as one-click install/invite links for Slack and Discord, plus direct to Docs and your Replit page.
