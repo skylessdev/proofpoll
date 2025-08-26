@@ -1,8 +1,3 @@
-// SPDX-License-Identifier: (MIT OR MPL-2.0)
-
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,31 +10,32 @@ datasource db {
 model Poll {
   id        String   @id @default(cuid())
   question  String
-  options   Option[]
   createdAt DateTime @default(now())
+  options   Option[]
 }
 
 model Option {
-  id        String  @id @default(cuid())
-  label     String
-  poll      Poll    @relation(fields: [pollId], references: [id])
-  pollId    String
-  votes     Vote[]
+  id     String @id @default(cuid())
+  label  String
+  pollId String
+  poll   Poll   @relation(fields: [pollId], references: [id])
+  votes  Vote[]
 }
 
 model Vote {
-  id            String   @id @default(cuid())
-  pollId        String
-  optionId      String
-  option        Option   @relation(fields: [optionId], references: [id])
-  voterProofId  String
-  proofHash     String
-  createdAt     DateTime @default(now())
+  id           String   @id @default(cuid())
+  pollId       String
+  optionId     String
+  voterProofId String
+  proofHash    String
+  createdAt    DateTime @default(now())
+  option       Option   @relation(fields: [optionId], references: [id])
+
   @@unique([pollId, voterProofId])
 }
 
 model SlackTeam {
-  id          String   @id  // Slack workspace/team ID
+  id          String   @id
   accessToken String
   botUserId   String
   teamName    String
