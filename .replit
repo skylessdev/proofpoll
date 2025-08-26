@@ -43,7 +43,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run build"
+args = "npx next build"
 
 [workflows.workflow.metadata]
 outputType = "console"
@@ -54,11 +54,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx prisma migrate deploy && npx next start -p 5000"
-waitForPort = 5000
+args = "npx prisma migrate deploy && npx next start -p 3000"
+waitForPort = 3000
 
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[ports]]
+localPort = 3000
+externalPort = 3001
 
 [[ports]]
 localPort = 5000
