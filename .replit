@@ -15,15 +15,26 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "ProofPoll Lite Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Production Build"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
+args = "ProofPoll Lite Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
 args = "Production Server"
+
+[[workflows.workflow]]
+name = "Production Build"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx next build"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [[workflows.workflow]]
 name = "ProofPoll Lite Server"
@@ -38,24 +49,13 @@ waitForPort = 5000
 outputType = "webview"
 
 [[workflows.workflow]]
-name = "Production Build"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npx next build"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
 name = "Production Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx prisma migrate deploy && npx next start -p 3000"
-waitForPort = 3000
+args = "npx prisma generate && npx next start -p 5001"
+waitForPort = 5001
 
 [workflows.workflow.metadata]
 outputType = "webview"
