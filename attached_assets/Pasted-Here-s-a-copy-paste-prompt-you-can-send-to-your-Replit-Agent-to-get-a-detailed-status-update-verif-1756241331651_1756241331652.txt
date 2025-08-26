@@ -1,0 +1,60 @@
+Here’s a copy-paste prompt you can send to your Replit Agent to get a detailed status update + verification:
+
+⸻
+
+Prompt for Replit Agent
+
+Give me a thorough, timestamped status report on the current ProofPoll Lite deployment and integrations. Do not make code changes unless something is clearly broken; focus on verifying, logging evidence, and summarizing findings.
+
+1) Environment & Runtime
+	•	Print Node, Next.js, Prisma versions.
+	•	List required env vars (names only, no secrets): DATABASE_URL, PROOF_SECRET, SLACK_SIGNING_SECRET, SLACK_BOT_TOKEN, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, DISCORD_PUBLIC_KEY, DISCORD_APP_ID, DISCORD_BOT_TOKEN. For each, report Present/Missing.
+	•	Confirm current public base URL the server believes (from headers / logs).
+
+2) Health & Build
+	•	Hit GET /api/health and show response + HTTP code.
+	•	Run npx prisma generate and npx prisma db pull (no schema changes) and confirm success.
+	•	Run a production build dry-run: NODE_ENV=production npx next build and report summary (routes, any warnings).
+
+3) Database sanity
+	•	Verify Prisma models exist including SlackTeam.
+	•	Count rows for Poll, Option, and SlackTeam (safe aggregate counts only).
+
+4) Slack integration
+	•	Confirm endpoints compile & are reachable:
+	•	POST /api/slack/commands (responds with signature error if no valid headers).
+	•	POST /api/slack/interactions (same).
+	•	GET /api/slack/oauth_redirect?code=dummy → should 400 with “Missing code” (or similar).
+	•	Print the exact OAuth Redirect URI we require (based on env + route):
+https://<current-domain>/api/slack/oauth_redirect.
+	•	Construct an Install URL (do not open it):
+https://slack.com/oauth/v2/authorize?client_id=$SLACK_CLIENT_ID&scope=commands,chat:write&redirect_uri=<redirect-uri>.
+	•	If possible without secrets, simulate token exchange with a dummy code and show expected error shape (to confirm handler logging).
+
+5) Discord integration
+	•	Verify endpoint: POST /api/discord/interactions returns 401 for invalid or missing signature (expected).
+	•	Confirm DISCORD_APP_ID and that /poll slash command JSON is present in repo for reference.
+
+6) Smoke test the core API
+	•	Create a poll via POST /api/polls (question “Agent Status Check”, options Yes/No, anon:false).
+	•	Vote once via POST /api/polls/{id}/vote with { source: "discord", userId: "agent-smoke" }.
+	•	Fetch GET /api/polls/{id} and show tallies.
+	•	Delete the test poll if such endpoint exists; otherwise leave it and note the ID.
+
+7) CI & Licensing
+	•	Show .github/workflows/ci.yml exists.
+	•	Run the SPDX header verifier: node scripts/verify-headers.mjs and report totals.
+
+8) Final deliverables
+	•	Output a clean, bulleted report with ✅/⚠️/❌ for each check, including:
+	•	Current domain(s) and health status
+	•	Present/Missing env vars
+	•	Build summary
+	•	DB counts (Poll/Option/SlackTeam)
+	•	Slack: endpoints, redirect URI, constructed install URL, last OAuth error if any
+	•	Discord: endpoint behavior, app id confirmation
+	•	Smoke test results with created poll ID
+	•	CI/licensing verification
+	•	If anything is failing, list actionable fixes with exact file paths and minimal diffs/commands.
+
+⸻
