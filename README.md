@@ -2,19 +2,19 @@
 
 <p align="center">
   <a href="https://slack.com/oauth/v2/authorize?client_id=9333130942147.933845&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect">
-    <img alt="Install Slack" src="https://img.shields.io/badge/Slack-Install%20App-4A154B?logo=slack&logoColor=white" />
+    <img alt="Install Slack" src="https://img.shields.io/badge/Slack-Install_App-4A154B?style=flat&logo=slack&logoColor=white" />
   </a>
   &nbsp;
   <a href="https://discord.com/oauth2/authorize?client_id=1406960180305858781&scope=applications.commands+bot&permissions=0">
-    <img alt="Invite Discord" src="https://img.shields.io/badge/Discord-Invite%20Bot-5865F2?logo=discord&logoColor=white" />
+    <img alt="Invite Discord" src="https://img.shields.io/badge/Discord-Invite_Bot-5865F2?style=flat&logo=discord&logoColor=white" />
   </a>
   &nbsp;
   <a href="https://proofpoll.replit.app/">
-    <img alt="Docs" src="https://img.shields.io/badge/Docs-Read%20More-00B0F0?logo=readthedocs&logoColor=white" />
+    <img alt="Docs" src="https://img.shields.io/badge/Docs-Read_More-00B0F0?style=flat&logo=readthedocs&logoColor=white" />
   </a>
   &nbsp;
   <a href="https://replit.com/@skylessdev/ProofPollLite">
-    <img alt="Deploy on Replit" src="https://img.shields.io/badge/Replit-Deploy-FF6C37?logo=replit&logoColor=white" />
+    <img alt="Deploy on Replit" src="https://img.shields.io/badge/Replit-Deploy-FF6C37?style=flat&logo=replit&logoColor=white" />
   </a>
 </p>
 
