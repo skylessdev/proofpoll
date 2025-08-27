@@ -1,0 +1,101 @@
+That error is a classic stale Next.js build artifact (a chunk like ./985.js is referenced by the dev server but no longer exists). Fix it by fully nuking caches, reinstalling deps, and rebuilding — then add a tiny guard to the Run/Deploy workflows so it doesn’t come back.
+
+Here’s a ready-to-paste Replit Agent prompt:
+
+⸻
+
+Agent
+
+Goal: Eliminate the “Cannot find module ’./985.js’” runtime error by purging all build caches, reinstalling dependencies, rebuilding, and hardening dev/prod workflows so caches are cleared before start.
+
+1) Stop servers & deep-clean caches
+
+Run these in project root:
+
+# stop any background servers
+pkill -f "next start" || true
+pkill -f "next dev"   || true
+
+# remove build artifacts and caches
+rm -rf .next .turbo node_modules/.cache .parcel-cache .vite dist
+
+# optional but helpful
+npm cache clean --force || true
+
+2) Reinstall dependencies cleanly
+
+Use lockfile if present; otherwise reinstall fresh.
+
+if [ -f package-lock.json ]; then
+  rm -rf node_modules && npm ci
+else
+  rm -rf node_modules && npm install
+fi
+
+3) Sanity checks
+
+node -v
+npx next --version
+# ensure Next is 15.4.x as pinned in package.json
+
+4) Rebuild & smoke test
+
+npx prisma generate
+npx next build
+
+# start a throwaway prod instance on 5001 and hit health
+PORT=5001 npx next start -p 5001 & echo $! > /tmp/prod.pid
+sleep 4
+curl -sS http://localhost:5001/api/health || true
+kill $(cat /tmp/prod.pid) 2>/dev/null || true
+
+5) Harden Run/Deploy workflows (prevent future stale builds)
+
+Update the workflow commands Replit uses:
+	•	Dev (Run button):
+
+rm -rf .next node_modules/.cache .turbo && \
+npx prisma generate && \
+next dev --port 5000
+
+
+	•	Deploy / Production Start:
+
+npx next build && \
+npx prisma generate && \
+next start -p 5001
+
+
+
+(If Replit UI requires separate “Build” and “Start” fields, set Build to npx next build and Start to npx prisma generate && npx next start -p 5001.)
+
+6) Verify both servers
+
+# dev
+curl -sS http://localhost:5000/api/health
+# prod
+curl -sS http://localhost:5001/api/health
+
+7) Confirm landing buttons render
+
+Open / on dev (5000). Ensure the Install to Slack and Add to Discord buttons are visible and links are:
+	•	Slack:
+
+https://slack.com/oauth/v2/authorize?client_id=9333130942147.9338455346085&scope=commands,chat:write&redirect_uri=https%3A%2F%2Fproofpoll.replit.app%2Fapi%2Fslack%2Foauth_redirect
+
+
+	•	Discord:
+
+https://discord.com/oauth2/authorize?client_id=1406960180305858781&scope=bot%20applications.commands
+
+
+
+Success criteria
+	•	No more ./985.js runtime error.
+	•	npx next build completes cleanly.
+	•	/api/health returns 200 on ports 5000 and 5001.
+	•	Landing page shows both Slack/Discord buttons and Slack link opens the OAuth consent page.
+
+⸻
+
+If the error persists after the deep clean, have the agent print the first 30 lines of .next/server/app/page.js (to confirm it no longer references a missing chunk) and re-run step 1–4; but in almost all cases, the purge + reinstall resolves it.

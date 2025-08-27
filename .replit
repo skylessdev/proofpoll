@@ -40,25 +40,25 @@ outputType = "console"
 name = "ProofPoll Lite Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npx prisma generate && npx next dev --port 5000"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -rf .next node_modules/.cache .turbo && npx prisma generate && npx next dev --port 5000"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Production Server"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx prisma generate && npx next start -p 5001"
+args = "npx next build && npx prisma generate && npx next start -p 5001"
 waitForPort = 5001
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[ports]]
 localPort = 3000
