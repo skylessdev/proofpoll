@@ -2,16 +2,16 @@
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 sm:p-12 lg:p-24 pb-20">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-6xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent break-words">
           ProofPoll Lite
         </h1>
-        <p className="mt-8 text-xl text-center text-gray-600 dark:text-gray-400">
+        <p className="mt-6 sm:mt-8 text-lg sm:text-xl text-center text-gray-600 dark:text-gray-400 px-4">
           A lightweight polling application with cryptographic proof mechanisms
         </p>
         {/* CTA Buttons */}
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row flex-wrap gap-3 justify-center">
           <a
             href="https://slack.com/oauth/v2/authorize?client_id=9333130942147.9338455346085&scope=commands,chat:write&redirect_uri=https%3A%2F%2Fproofpoll.replit.app%2Fapi%2Fslack%2Foauth_redirect"
             target="_blank"
@@ -34,11 +34,11 @@ export default function Home() {
             Add to Discord
           </a>
         </div>
-        <div className="mt-16 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-4">
+        <div className="mt-12 sm:mt-16 flex items-center justify-center px-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-200 dark:border-gray-700 w-full max-w-md">
+            <div className="flex items-center space-x-2 sm:space-x-4 justify-center">
               <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
                 Next.js 14 + TypeScript + Tailwind + Prisma
               </span>
             </div>
@@ -47,7 +47,7 @@ export default function Home() {
       </div>
       
       {/* Footer */}
-      <footer className="absolute bottom-4 left-0 right-0 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+      <footer className="mt-12 sm:mt-16 flex items-center justify-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">
         <div className="flex items-center space-x-2">
           <a
             href="https://github.com/skylessinnovation/proofpoll-lite"
