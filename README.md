@@ -13,9 +13,6 @@
     <img alt="Docs" src="https://img.shields.io/badge/Docs-Read_More-00B0F0?style=flat&logo=readthedocs&logoColor=white" />
   </a>
   &nbsp;
-  <a href="https://replit.com/@skylessdev/ProofPollLite">
-    <img alt="Deploy on Replit" src="https://img.shields.io/badge/Replit-Deploy-FF6C37?style=flat&logo=replit&logoColor=white" />
-  </a>
 </p>
 
 [![CI](https://github.com/skylessinnovation/proofpoll-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/skylessinnovation/proofpoll-lite/actions/workflows/ci.yml)
