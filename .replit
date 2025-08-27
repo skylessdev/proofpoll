@@ -45,7 +45,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "rm -rf .next node_modules/.cache .turbo && npx prisma generate && npx next dev --port 5000"
+args = "bash -lc 'rm -rf .next .turbo node_modules/.cache && NEXT_DISABLE_FILE_SYSTEM_CACHE=1 NEXT_TELEMETRY_DISABLED=1 TURBOPACK=1 npx prisma generate && npx next dev --port 5000'"
 waitForPort = 5000
 
 [[workflows.workflow]]
