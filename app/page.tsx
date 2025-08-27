@@ -50,7 +50,7 @@ export default function Home() {
       <footer className="mt-12 sm:mt-16 flex items-center justify-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">
         <div className="flex items-center space-x-2">
           <a
-            href="https://github.com/skylessinnovation/proofpoll-lite"
+            href="https://github.com/skylessdev/proofpoll"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
