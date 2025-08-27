@@ -4,6 +4,9 @@
   "description": "A lightweight polling application built with Next.js 14, TypeScript, Tailwind CSS, and Prisma.",
   "main": "next.config.js",
   "scripts": {
+    "dev": "next dev --port 5000",
+    "build": "next build",
+    "start": "prisma generate && next start -p 5001",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
