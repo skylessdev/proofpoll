@@ -1,0 +1,47 @@
+Goal: Add “Install to Slack” and “Add to Discord” hyperlink buttons to the landing page using Tailwind. Use Slack Client ID 9333130942147.9338455346085 and the production redirect URI (URL-encoded).
+
+Changes to make:
+	1.	Edit app/page.tsx and in the main hero/CTA section insert this JSX:
+
+{/* CTA Buttons */}
+<div className="mt-8 flex flex-wrap gap-3">
+  <a
+    href="https://slack.com/oauth/v2/authorize?client_id=9333130942147.9338455346085&scope=commands,chat:write&redirect_uri=https%3A%2F%2Fproofpoll.replit.app%2Fapi%2Fslack%2Foauth_redirect"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Install ProofPoll Lite to Slack"
+    className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium bg-[#4A154B] text-white hover:opacity-95 transition"
+  >
+    <span className="mr-2 inline-block h-2 w-2 bg-white rounded-sm" />
+    Install to Slack
+  </a>
+
+  <a
+    href="https://discord.com/oauth2/authorize?client_id=1406960180305858781&scope=bot%20applications.commands"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Add ProofPoll Lite to Discord"
+    className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium border border-gray-300 text-gray-900 hover:bg-gray-50 transition"
+  >
+    <span className="mr-2 inline-block h-2 w-2 rounded-full bg-gray-400" />
+    Add to Discord
+  </a>
+</div>
+
+Note: The redirect_uri is URL-encoded:
+https%3A%2F%2Fproofpoll.replit.app%2Fapi%2Fslack%2Foauth_redirect
+
+	2.	No env vars needed for these buttons (hard-coded links are intentional).
+	3.	Build & quick checks
+
+	•	Run: npx next build (should succeed)
+	•	Start prod (port 5001 already configured): curl -s http://localhost:5001/api/health → HTTP 200 JSON
+	•	Open the app in dev and click the Slack button—it should show Slack’s OAuth consent for your app.
+
+Acceptance criteria:
+	•	Landing page shows Install to Slack and Add to Discord buttons.
+	•	Slack button opens OAuth using Client ID 9333130942147.9338455346085 and redirect https://proofpoll.replit.app/api/slack/oauth_redirect (encoded in the URL).
+	•	Discord button keeps the working invite link.
+	•	Build passes; /api/health returns 200 on dev (5000) and prod (5001).
+
+⸻
