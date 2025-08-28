@@ -40,6 +40,12 @@ export async function verifyDiscord(req: Request): Promise<{ rawBody: string }> 
     throw new Error('Invalid Discord signature')
   }
   
-  console.log('Discord verify: PASS - Signature validated')
+  console.log('🔒 Discord Signature Verified:', {
+    algorithm: 'Ed25519',
+    publicKeyLength: process.env.DISCORD_PUBLIC_KEY?.length,
+    signatureLength: signature.length,
+    verified: true,
+    timestamp: new Date().toISOString()
+  })
   return { rawBody }
 }

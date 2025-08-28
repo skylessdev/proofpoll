@@ -47,6 +47,14 @@ export async function POST(request: NextRequest) {
       queueMicrotask(async () => {
         try {
           // Record vote via our API
+          console.log('🔐 ProofPoll Slack Vote:', {
+            pollId,
+            optionId,
+            userId: user.id,
+            source: 'slack',
+            timestamp: new Date().toISOString()
+          })
+          
           const voteResponse = await fetch(`${baseUrl}/api/polls/${pollId}/vote`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -71,6 +79,10 @@ export async function POST(request: NextRequest) {
           }
           
           if (!voteResponse.ok) {
+            console.error('❌ Slack vote failed:', {
+              status: voteResponse.status,
+              statusText: voteResponse.statusText
+            })
             await fetch(responseUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -81,6 +93,17 @@ export async function POST(request: NextRequest) {
             })
             return
           }
+          
+          // Log cryptographic proof data from vote response
+          const voteData = await voteResponse.json()
+          console.log('🔒 Cryptographic Proof Generated:', {
+            voterProofId: voteData.voterProofId,
+            proofHash: voteData.proofHash,
+            proofVerified: voteData.proofVerified,
+            algorithm: 'HMAC-SHA256',
+            source: 'slack',
+            userId: user.id
+          })
           
           // Get updated poll data
           const pollResponse = await fetch(`${baseUrl}/api/polls/${pollId}`)

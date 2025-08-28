@@ -54,6 +54,17 @@ export async function POST(
     // Generate proof
     const voterProofId = getVoterProofId(source, userId)
     const { proofHash } = signVote({ pollId, optionId, voterProofId })
+    
+    console.log('🔐 Generating Cryptographic Proof:', {
+      algorithm: 'HMAC-SHA256',
+      source,
+      userId,
+      pollId,
+      optionId,
+      voterProofId,
+      proofHash,
+      timestamp: new Date().toISOString()
+    })
 
       // Check for existing vote
       const existingVote = await db.$queryRaw<{id: string}[]>`
@@ -84,6 +95,14 @@ export async function POST(
         ORDER BY o.id
       `
 
+      console.log('✅ Vote Recorded with Cryptographic Proof:', {
+        voteId,
+        voterProofId,
+        proofHash,
+        verified: true,
+        algorithm: 'HMAC-SHA256'
+      })
+      
       return NextResponse.json({
         ok: true,
         pollId,

@@ -30,6 +30,15 @@ export async function verifySlack(req: Request): Promise<{ ok: true; rawBody: st
     throw new Error('Invalid signature')
   }
   
+  console.log('🔒 Slack Signature Verified:', {
+    algorithm: 'HMAC-SHA256',
+    basestring: `v0:${timestamp}:${rawBody.substring(0, 50)}...`,
+    expectedSigPrefix: expectedSig.substring(0, 10),
+    receivedSigPrefix: signature.substring(0, 10),
+    verified: true,
+    timestamp: new Date().toISOString()
+  })
+  
   return { ok: true, rawBody, ts: timestamp, sig: signature }
 }
 
