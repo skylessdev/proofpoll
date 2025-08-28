@@ -28,9 +28,9 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Add ProofPoll Lite to Discord"
-            className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 transition-all duration-200"
+            className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium bg-[#5865F2] text-white hover:bg-[#4752C4] hover:scale-105 transition-all duration-200"
           >
-            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-300" />
+            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-white" />
             Add to Discord
           </a>
         </div>
