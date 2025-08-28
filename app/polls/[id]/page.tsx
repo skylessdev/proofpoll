@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
+import CryptoLogger from './components/CryptoLogger'
 
 interface Poll {
   id: string
@@ -80,6 +81,9 @@ export default async function PollResultsPage({ params }: { params: Promise<{ id
             </p>
           </div>
         </div>
+        
+        {/* Add crypto logging component */}
+        <CryptoLogger pollId={poll.id} />
       </div>
     </div>
   )
