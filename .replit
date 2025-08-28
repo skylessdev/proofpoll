@@ -19,11 +19,11 @@ args = "Production Build"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "ProofPoll Lite Server"
+args = "Production Server"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Production Server"
+args = "ProofPoll Lite"
 
 [[workflows.workflow]]
 name = "Production Build"
@@ -37,18 +37,6 @@ args = "npx next build"
 outputType = "console"
 
 [[workflows.workflow]]
-name = "ProofPoll Lite Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -lc 'rm -rf .next .turbo node_modules/.cache && NEXT_DISABLE_FILE_SYSTEM_CACHE=1 NEXT_TELEMETRY_DISABLED=1 TURBOPACK=1 npx prisma generate && npx next dev --port 5000'"
-waitForPort = 5000
-
-[[workflows.workflow]]
 name = "Production Server"
 author = "agent"
 
@@ -59,6 +47,18 @@ outputType = "console"
 task = "shell.exec"
 args = "npx next build && npx prisma generate && npx next start -p 5001"
 waitForPort = 5001
+
+[[workflows.workflow]]
+name = "ProofPoll Lite"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx next start -p 5000"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [[ports]]
 localPort = 3000

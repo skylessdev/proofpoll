@@ -1,4 +1,5 @@
-// app/dashboard/page.tsx - DBT Analytics Dashboard for ProofPoll
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -108,6 +109,8 @@ export default function DBTDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    const interval = setInterval(fetchDashboardData, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
   }, []);
 
   async function fetchDashboardData() {
@@ -152,11 +155,11 @@ export default function DBTDashboard() {
     return acc;
   }, {} as Record<string, number>);
 
-  const topVotersByIntegrity = [...integrity]
+  const topVotersByIntegrity = Array.from(integrity)
     .sort((a, b) => b.integrity - a.integrity)
     .slice(0, 10);
 
-  const uniquePolls = [...new Set(metrics.map(m => m.pollId))];
+  const uniquePolls = Array.from(new Set(metrics.map(m => m.pollId)));
 
   if (loading) {
     return (

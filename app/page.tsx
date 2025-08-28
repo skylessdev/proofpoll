@@ -33,6 +33,15 @@ export default function Home() {
             <span className="mr-2 inline-block h-2 w-2 rounded-full bg-white" />
             Add to Discord
           </a>
+          
+          <a
+            href="/dashboard"
+            aria-label="View DBT Analytics Dashboard"
+            className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium bg-gray-700 text-white hover:bg-gray-800 hover:scale-105 transition-all duration-200"
+          >
+            <span className="mr-2">📊</span>
+            DBT Analytics
+          </a>
         </div>
         <div className="mt-12 sm:mt-16 flex items-center justify-center px-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-200 dark:border-gray-700 w-full max-w-md">

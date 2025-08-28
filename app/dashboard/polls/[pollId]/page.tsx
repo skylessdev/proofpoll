@@ -1,8 +1,10 @@
-// app/dashboard/polls/[pollId]/page.tsx - Detailed poll analysis page
+/* SPDX-License-Identifier: (MIT OR MPL-2.0) */
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 
 interface PollAnalysis {
   poll: {
@@ -235,7 +237,7 @@ export default function PollAnalysisPage() {
         {/* Header */}
         <div className="mb-8">
           <nav className="text-sm breadcrumb mb-4">
-            <a href="/dashboard" className="text-blue-600 hover:underline">Dashboard</a>
+            <Link href="/dashboard" className="text-blue-600 hover:underline">Dashboard</Link>
             <span className="mx-2 text-gray-500">/</span>
             <span className="text-gray-700">Poll Analysis</span>
           </nav>
