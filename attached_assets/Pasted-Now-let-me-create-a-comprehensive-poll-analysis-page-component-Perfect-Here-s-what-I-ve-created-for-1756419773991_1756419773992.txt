@@ -1,0 +1,52 @@
+Now let me create a comprehensive poll analysis page component:Perfect. Here's what I've created for the ProofPoll DBT dashboard:
+
+## Complete DBT Visualization Suite
+
+**1. Main Dashboard (`app/dashboard/page.tsx`)**
+- **Consensus Health Overview**: Real-time aggregate metrics
+- **Vote Analysis Table**: Recent votes with DBT breakdown
+- **Voter Integrity Leaderboard**: Top performers by integrity score  
+- **Filter by Poll**: Analyze specific polls or system-wide
+
+**2. Live Monitoring (`LiveConsensusMonitor.tsx`)**
+- **Real-time Stream**: Live vote feed with divergence indicators
+- **Alert System**: Automated warnings for flash swings, high divergence, verdict spikes
+- **Health Indicator**: Current consensus strength gauge
+- **Configurable Thresholds**: Customizable alert rules
+
+**3. Detailed Poll Analysis (`polls/[pollId]/page.tsx`)**
+- **Consensus Evolution Chart**: Timeline showing how consensus developed
+- **Vote Distribution**: Standard poll results + DBT quality metrics
+- **Voter Behavior Analysis**: High integrity vs suspicious voting patterns
+- **Forensic Timeline**: Chronological divergence tracking
+
+**4. Supporting API Endpoints**
+- `/api/dbt/metrics` - Recent DBT vote metrics
+- `/api/dbt/integrity` - Voter integrity scores
+- `/api/dbt/consensus` - Consensus evolution data  
+- `/api/dbt/stats` - Aggregate system statistics
+- `/api/dbt/polls/[id]/analysis` - Detailed poll analysis
+
+## Key Visualizations
+
+**Consensus Health**: Color-coded strength indicator (green = strong consensus, red = high divergence)
+
+**Live Alert System**: Real-time warnings for:
+- High divergence spikes (individual votes > 0.8)
+- Flash voting patterns (5+ votes/minute)  
+- REJECT verdict spikes (>30% rejection rate)
+
+**Evolution Timeline**: Shows how consensus changed over time, with individual vote divergence dots and cumulative average trend line
+
+**Forensic Analysis**: Can trace exactly when and how consensus broke down, which voters contributed to divergence
+
+## Real-World Demo Value
+
+This transforms ProofPoll from a simple voting tool into a **governance analytics platform**. During a Slack demo, you could:
+
+1. Run a controversial poll in the channel
+2. Watch the dashboard detect "flash swings" as people rapidly change positions  
+3. Show voter integrity scores updating in real-time
+4. Analyze which discussion moments led to consensus breakdown
+
+The system provides **measurable evidence** of consensus manipulation, vote brigading, or authentic opinion evolution - making subjective governance decisions quantitatively verifiable.
