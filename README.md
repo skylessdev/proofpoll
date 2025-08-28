@@ -1,7 +1,7 @@
 # ProofPoll Lite
 
 <p align="center">
-  <a href="https://slack.com/oauth/v2/authorize?client_id=9333130942147.933845&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect">
+  <a href="https://slack.com/oauth/v2/authorize?client_id=9333130942147.9338455346085&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect">
     <img alt="Install Slack" src="https://img.shields.io/badge/Slack-Install_App-4A154B?style=flat&logo=slack&logoColor=white" />
   </a>
   &nbsp;
@@ -55,7 +55,7 @@ You can add ProofPoll Lite to your Slack workspace in just a few steps:
 
 Use the official Slack OAuth install link:
 
-https://slack.com/oauth/v2/authorize?client_id=9333130942147.933845&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect
+https://slack.com/oauth/v2/authorize?client_id=9333130942147.9338455346085&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect
 
 The redirect URI is already configured in your app and points to the hosted ProofPoll Lite backend.
 
