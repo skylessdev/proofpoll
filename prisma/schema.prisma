@@ -43,3 +43,31 @@ model SlackTeam {
   teamName    String
   installedAt DateTime @default(now())
 }
+
+model DbtVoteMetric {
+  id            String   @id @default(cuid())
+  voteId        String   @unique
+  pollId        String
+  voterId       String
+  deltaLogic    Float
+  deltaTemporal Float
+  divergence    Float
+  verdict       String
+  reasons       Json
+  createdAt     DateTime @default(now())
+
+  @@index([pollId])
+  @@index([voterId])
+}
+
+model DbtIntegrity {
+  id               String   @id @default(cuid())
+  voterId          String
+  scope            String
+  integrity        Float
+  interactionCount Int
+  avgDivergence    Float
+  updatedAt        DateTime @default(now())
+
+  @@unique([voterId, scope])
+}

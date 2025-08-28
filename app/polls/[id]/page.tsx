@@ -3,6 +3,10 @@
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import CryptoLogger from './components/CryptoLogger'
+import DbtTimeline from './components/DbtTimeline'
+import DbtIntegrityTable from './components/DbtIntegrityTable'
+import { createDb } from '@/lib/db'
+import { DBT_ENABLED } from '@/lib/dbt/config'
 
 interface Poll {
   id: string
@@ -15,6 +19,44 @@ interface Poll {
   }>
 }
 
+async function getDbtSummary(pollId: string, baseUrl: string) {
+  if (!DBT_ENABLED) return { points: [], avg: 0, count: 0 };
+  
+  try {
+    const res = await fetch(`${baseUrl}/api/polls/${pollId}/dbt/summary`, { 
+      cache: "no-store" 
+    });
+    if (!res.ok) return { points: [], avg: 0, count: 0 };
+    return res.json();
+  } catch {
+    return { points: [], avg: 0, count: 0 };
+  }
+}
+
+async function getDbtIntegrityRows(pollId: string) {
+  if (!DBT_ENABLED) return [];
+  
+  try {
+    const db = createDb();
+    const scope = `poll:${pollId}`;
+    const rows = await db.$queryRaw<{
+      voterId: string; 
+      integrity: number; 
+      interactionCount: number; 
+      avgDivergence: number;
+    }[]>`
+      SELECT "voterId", "integrity", "interactionCount", "avgDivergence"
+      FROM "DbtIntegrity" 
+      WHERE "scope" = ${scope}
+      ORDER BY "integrity" ASC
+    `;
+    await db.$disconnect();
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
 export default async function PollResultsPage({ params }: { params: Promise<{ id: string }> }) {
   // Await params and headers for Next.js 15
   const { id } = await params
@@ -23,21 +65,28 @@ export default async function PollResultsPage({ params }: { params: Promise<{ id
   const host = h.get('x-forwarded-host') ?? h.get('host')
   const baseUrl = `${proto}://${host}`
   
-  // Fetch poll data
-  let poll: Poll
+  // Fetch poll data and DBT data in parallel
+  let poll: Poll;
+  let dbtSummary: { points: any[], avg: number, count: number };
+  let dbtIntegrityRows: any[];
+  
   try {
-    const response = await fetch(`${baseUrl}/api/polls/${id}`, {
-      cache: 'no-store'
-    })
+    const [pollResponse, dbtSummaryData, dbtIntegrityData] = await Promise.all([
+      fetch(`${baseUrl}/api/polls/${id}`, { cache: 'no-store' }),
+      getDbtSummary(id, baseUrl),
+      getDbtIntegrityRows(id)
+    ]);
     
-    if (!response.ok) {
-      notFound()
+    if (!pollResponse.ok) {
+      notFound();
     }
     
-    poll = await response.json()
+    poll = await pollResponse.json();
+    dbtSummary = dbtSummaryData;
+    dbtIntegrityRows = dbtIntegrityData;
   } catch (error) {
-    console.error('Failed to fetch poll:', error)
-    notFound()
+    console.error('Failed to fetch poll data:', error);
+    notFound();
   }
   
   // Calculate total votes for percentages
@@ -81,6 +130,32 @@ export default async function PollResultsPage({ params }: { params: Promise<{ id
             </p>
           </div>
         </div>
+        
+        {/* DBT Consensus Analysis */}
+        {DBT_ENABLED && (
+          <div className="mt-6 space-y-4">
+            <section className="border border-gray-200 rounded-xl p-4 bg-white">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-gray-900">DBT Consensus Analysis</h3>
+                <div className="text-xs text-gray-600">
+                  avg divergence: {dbtSummary.avg?.toFixed?.(3) ?? "0.000"} • votes: {dbtSummary.count ?? 0}
+                </div>
+              </div>
+              <DbtTimeline points={dbtSummary.points || []} />
+              <div className="mt-2 text-xs text-gray-500">
+                Tracks voting pattern divergence over time using dual-baseline telemetry
+              </div>
+            </section>
+            
+            <section className="border border-gray-200 rounded-xl p-4 bg-white">
+              <h3 className="font-medium text-gray-900 mb-3">Voter Integrity Metrics</h3>
+              <DbtIntegrityTable rows={dbtIntegrityRows} />
+              <div className="mt-2 text-xs text-gray-500">
+                Integrity scores based on voting pattern consistency (scope: poll)
+              </div>
+            </section>
+          </div>
+        )}
         
         {/* Add crypto logging component */}
         <CryptoLogger pollId={poll.id} />
