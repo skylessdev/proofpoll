@@ -57,8 +57,6 @@ Use the official Slack OAuth install link:
 
 https://slack.com/oauth/v2/authorize?client_id=9333130942147.9338455346085&scope=commands,chat:write&redirect_uri=https://proofpoll.replit.app/api/slack/oauth_redirect
 
-The redirect URI is already configured in your app and points to the hosted ProofPoll Lite backend.
-
 ### 2. Authorize in Slack
 - Choose your workspace
 - Approve the requested permissions (/poll slash command, posting messages)
@@ -85,15 +83,7 @@ https://discord.com/oauth2/authorize?client_id=1406960180305858781&scope=applica
 
 The bot requires minimal permissions — just enough to post polls and handle interactions.
 
-### 2. Verify Interactions Endpoint
-
-In the Discord Developer Portal → General Information, ensure the Interactions Endpoint URL is set to:
-
-https://proofpoll.replit.app/api/discord/interactions
-
-This allows Discord to verify and forward slash commands and button clicks.
-
-### 3. Use the /poll Command
+### 2. Use the /poll Command
 
 Once installed:
 1. In any channel, type:
